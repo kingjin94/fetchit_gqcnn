@@ -114,7 +114,6 @@ inpaint_rescale_factor : float
 
 """
 
-# TODO: Try to get image from coresponding ROS topic instead of a file --> Previous Jupyter notebooks
 # TODO: Find mapping from camera to base (maybe with this? http://docs.ros.org/indigo/api/moveit_tutorials/html/doc/pr2_tutorials/planning/scripts/doc/move_group_python_interface_tutorial.html)
 
 from rospy import init_node
