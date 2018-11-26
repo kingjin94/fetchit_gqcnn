@@ -114,9 +114,11 @@ inpaint_rescale_factor : float
 
 """
 
-# TODO: Find mapping from camera to base (maybe with this? http://docs.ros.org/indigo/api/moveit_tutorials/html/doc/pr2_tutorials/planning/scripts/doc/move_group_python_interface_tutorial.html)
+"""
+Modified version of gqcnn policy demo which takes in images from the fetch robot published on head_camera/depth_registered/image_raw and /head_camera/rgb/image_raw and publishes a grasp pose on /planned_grasp. The grasp pose encodes a postion to grasp at (with implict start width of 10 cm) and an angle to approach from as a quarternion
+"""
 
-from rospy import init_node
+from rospy import init_node, get_rostime, Publisher
 init_node("gqcnn_planner")
 from rospy.client import wait_for_message
 # ROS Image message
@@ -125,8 +127,10 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 # OpenCV2 for saving an image
 import cv2
-
 bridge = CvBridge()
+import tf
+from std_msgs.msg import Header
+from geometry_msgs.msg import PoseStamped
 
 import argparse
 import logging
@@ -240,7 +244,7 @@ if __name__ == '__main__':
     vis.title("Color image")
     vis.subplot(1,3,2)
     vis.imshow(rgbd_im.depth)
-    vis.title("Color image")
+    vis.title("Depth image")
     vis.subplot(1,3,3)
     vis.imshow(segmask)
     vis.title("Segmentation mask")
@@ -254,6 +258,26 @@ if __name__ == '__main__':
     logging.info('Planning took %.3f sec' %(time.time() - policy_start))
     print("Goal pose:")
     print(action.grasp.pose())
+    print(action.grasp.pose().pose_msg)
+    
+    # Into world frame --> Get current camera to base, transform action.grasp.pose()
+    tf_listener_ = tf.TransformListener()
+    i = 0
+    while(not (tf_listener_.frameExists("base_link") and tf_listener_.frameExists("head_camera_depth_optical_frame"))):
+        i += 1
+
+    now = get_rostime()
+    while(not tf_listener_.canTransform("base_link", "head_camera_depth_optical_frame", now)):
+        i += 1
+        now = get_rostime()
+    # print tf_listener_.lookupTransform("base_link", "head_camera_depth_optical_frame", now)
+    hdr = Header(stamp=now, frame_id='head_camera_depth_optical_frame')
+    pose_msg = PoseStamped(header=hdr, pose=action.grasp.pose().pose_msg)
+    # print(pose_msg)
+    # print(tf_listener_.transformPose("base_link", pose_msg))
+    pub = Publisher('/planned_grasp', PoseStamped, queue_size=1, latch=True)
+    pub.publish(pose_msg)
+
 
     # vis final grasp
     if policy_config['vis']['final_grasp']:

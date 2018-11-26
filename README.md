@@ -3,6 +3,11 @@ Fetchit GQCNN
 
 Grasp planner based on GQCNN and their policy demo.
 
+Description
+-----------
+
+Modified version of gqcnn policy demo which takes in images from the fetch robot published on head_camera/depth_registered/image_raw and /head_camera/rgb/image_raw and publishes a grasp pose on /planned_grasp. The grasp pose encodes a postion to grasp at (with implict start width of 10 cm) and an angle to approach from as a quarternion
+
 Usage
 ---------
   * Start fetchit demo: ```roslaunch fetch_gazebo playground.launch```
