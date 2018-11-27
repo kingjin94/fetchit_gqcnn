@@ -118,7 +118,7 @@ inpaint_rescale_factor : float
 Modified version of gqcnn policy demo which takes in images from the fetch robot published on head_camera/depth_registered/image_raw and /head_camera/rgb/image_raw and publishes a grasp pose on /planned_grasp. The grasp pose encodes a postion to grasp at (with implict start width of 10 cm) and an angle to approach from as a quarternion
 """
 
-from rospy import init_node, get_rostime, Publisher
+from rospy import init_node, get_rostime, Publisher, spin
 init_node("gqcnn_planner")
 from rospy.client import wait_for_message
 # ROS Image message
@@ -274,7 +274,7 @@ if __name__ == '__main__':
     hdr = Header(stamp=now, frame_id='head_camera_depth_optical_frame')
     pose_msg = PoseStamped(header=hdr, pose=action.grasp.pose().pose_msg)
     # print(pose_msg)
-    # print(tf_listener_.transformPose("base_link", pose_msg))
+    pose_msg = tf_listener_.transformPose("base_link", pose_msg)
     pub = Publisher('/planned_grasp', PoseStamped, queue_size=1, latch=True)
     pub.publish(pose_msg)
 
@@ -291,4 +291,6 @@ if __name__ == '__main__':
         vis.grasp(action.grasp, scale=1.5, show_center=False, show_axis=True)
         vis.title('Planned grasp on depth (Q=%.3f)' %(action.q_value))
         vis.show()
+        
+    spin()
 
