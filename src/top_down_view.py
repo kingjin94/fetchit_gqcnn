@@ -81,7 +81,8 @@ joint_names = ["torso_lift_joint", "shoulder_pan_joint",
                "elbow_flex_joint", "forearm_roll_joint",
                "wrist_flex_joint", "wrist_roll_joint"]
 # Lists of joint angles in the same order as in joint_names
-disco_poses = [[4.0, 1.32, 1.40, -0.2, 1.72, 0.0, 1.66, 0.0]] # Max torso and keep arm tugged away
+# disco_poses = [[4.0, 1.32, 1.40, -0.2, 1.72, 0.0, 1.66, 0.0]] # Max torso and keep arm tugged away
+disco_poses = [[4.0, 2.3, 0, 0, 0, 0.0, 0, 0.0]]  # Max torso, arm streched out to be out of the view
 
 for pose in disco_poses:
     if rospy.is_shutdown():
